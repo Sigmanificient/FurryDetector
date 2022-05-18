@@ -166,9 +166,7 @@ class DatasetGenerator:
 
     def generateDataset(self, tweets):
 
-        rawText = ""
-        for text in [tweet.full_text for tweet in tweets]:
-            rawText += " " + text
+        rawText = "".join(f" {text}" for text in [tweet.full_text for tweet in tweets])
         rawText = TextParser().cleanRawText(rawText)
 
         userDict = self.processText(rawText)
@@ -213,11 +211,8 @@ class FurryDetector:
         self.model = self.loadModel()
 
     def loadModel(self):
-        # open json file
-        json_file = open("model/model.json", "r")
-        loaded_model_json = json_file.read()
-        json_file.close()
-
+        with open("model/model.json", "r") as json_file:
+            loaded_model_json = json_file.read()
         # convert to keras model
         loaded_model = model_from_json(loaded_model_json)
 
@@ -363,10 +358,7 @@ def testUser():
 
             # Get number of statuses
             user_statuses = user.statuses_count
-            if user_statuses > tweet_limit:
-                tweet_limit = 3200
-            else:
-                tweet_limit = user_statuses
+            tweet_limit = 3200 if user_statuses > tweet_limit else user_statuses
             updateScale(tweet_limit)
 
             # Get Image
@@ -390,11 +382,6 @@ def testUser():
             twitter_user_canvas.itemconfigure(user_img, image=user_image)
 
             twitter_status_label.configure(text="Error, User not found.", fg="red")
-
-        except:
-            twitter_status_label.configure(
-                text="An unknown error occured, please try again.", fg="red"
-            )
 
     else:
         twitter_status_label.configure(text="Please enter a Twitter user", fg="red")
@@ -451,7 +438,6 @@ def updateScale(tweet_limit):
     tick_interval = tweet_limit // 8
 
     tweet_scale.configure(state=NORMAL, to=tweet_limit, tickinterval=tick_interval)
-    pass
 
 
 def updateAmt(self):
